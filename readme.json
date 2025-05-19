@@ -1,0 +1,35 @@
+{
+    "1.env file setting": [
+      "1. Set your wallet private key to 'PRIVATE_KEY' item.",
+      "2. Set your JSON RPC endpoint to 'ENDPOINT' item.",
+      "3. Set your gRPC endpoint to 'GRPC_URL' item.",
+      "4. Set your gRPC access token to 'GRPC_ACCESS_TOKEN' item."
+    ],
+    "2.Config Setting": [
+      "1. Open src/config.ts file and then set the proper value to each items.",
+      "2. Buy Amount : Amount of sol to buy token",
+      "3. Slippage : Slippage value for buy/sell.",
+      "4. Cumulative SOL : If the total amount of SOL for all wallets related with creating token exeeds this value, bot will buy this token.(dev wallet, zombie wallets). ",
+      "5. Individual Threshold : If anyone of the wallet balance realted with creating token exxceeds this value, bot will buy this token.",
+      "6. Priority Fee : Solana transaction priority fee.(in lamport)",
+      "7. Retry Count : If buy/sell transaction failed, bot will retry same as this number.",
+      "8. Jito Tip : Jito tip amount",
+      "9. Blacklist : If the token creator is in this list, bot will not buy this token.",
+      "10. TP(%) : If the current price is over than this value compare with the bought price, sell tokens automatically.",
+      "11. SL : If the current price is less than this value compare with the bought price, sell tokens automatically.",
+      "12. Timeout : If the elapsed time since bought exceeds this value, sell tokens automatically"
+    ],
+    "2.Run Bot": [
+      "1. Install Visual Studio Code(VSCode) on your local machine.",
+      "2. Run VSCode",
+      "3. Press 'F1'",
+      "4. Select connect 'Remote-SSH: Connect to Host'",
+      "5. Input 'ubuntu@<your vps ip>' and press 'Enter'",
+      "6. Enter password",
+      "7. Copy your bot source directory to '/home/ubunu/",
+      "8. On terminal panel, enter 'cd pumpfun-sniper'",
+      "9. If you are running on the new VPS enter 'npm i' first.",
+      "10. Enter 'npm start'",
+      "11. enjoy."
+    ]
+}
