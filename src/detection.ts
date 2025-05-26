@@ -40,7 +40,7 @@ export function detectionPf(data: any, grpcId: number) {
       if (tokenCache.has(token))
         break;
       tokenCache.add(token)
-      reportDetectionTime(`(GRPC-${grpcId}) ${token}`, data.block, undefined, `(initialBuy = ${data.initialBuy})`)
+      reportDetectionTime(`(GRPC-${grpcId}) ${token}`, data.block, undefined, `(initialPrice = ${data.initialPrice}, devBuy = ${data.initialBuy})`)
       handlePfMint(data)
       break
     default:

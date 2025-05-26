@@ -47,10 +47,11 @@ export async function trade(tokenInfo: TokenInfo) {
       config.trade.amount,
       config.trade.slippage,
       config.trade.prioFee,
-      {
-        type: "jito",
-        amount: config.trade.buyTip,
-      },
+      config.trade.buyTip,
+      // {
+      //   type: "jito",
+      //   amount: config.trade.buyTip,
+      // },
       tokenInfo.initialPrice,
       tokenInfo.creator
     )
