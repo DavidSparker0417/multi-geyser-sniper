@@ -1,4 +1,4 @@
-import { getCurrentTimestamp, sleep, SOL_ACCOUNT_RENT_FEE, solNonceCurrent, solPFBuy, solPFCalcAmountOut, solPFCalcTokenAmount, solPFFetchPrice, solPFSell, solTokenBalance, solTrGetBalanceChange} from "dv-sol-lib";
+import { getCurrentTimestamp, sleep, SOL_ACCOUNT_RENT_FEE, solNonceCurrent, solPFBuy, solPFCalcAmountOut, solPFCalcTokenAmount, solPFFetchPrice, solPFSell, solTokenBalance, solTrGetBalanceChange } from "dv-sol-lib";
 import { TokenInfo } from "../types";
 import { config } from "../config";
 import { reportBought } from "../alert";
@@ -38,25 +38,36 @@ export async function trade(tokenInfo: TokenInfo) {
     investAmount = config.trade.amount
   }
   else {
-    const tx = await solPFBuy(
+    let retryCnt = 0
+    let tx
+    // while (retryCnt < 3) {
+    tx = await solPFBuy(
       gSigner,
       token,
       config.trade.amount,
       config.trade.slippage,
       config.trade.prioFee,
       {
-        type: "blox",
+        type: "jito",
         amount: config.trade.buyTip,
       },
       tokenInfo.initialPrice,
       tokenInfo.creator
     )
-    if (!tx) {
+    if (tx) {
+      reportBought(token, tx, tokenInfo.mintBlock)
+      // break
+    } else {
       console.log(`❌ [${token}] Failed to buy token with amount ${config.trade.amount} SOL`)
+      retryCnt++
+    }
+    // continue
+    // }
+
+    if (!tx) {
       tradingCount--
       return
     }
-    reportBought(token, tx, tokenInfo.mintBlock)
 
     // wait for buy confirmation
     tokenBalance = (await solTokenBalance(token, gSigner.publicKey, 30))[0]
@@ -135,7 +146,7 @@ async function sell(token: string, tokenBalance: number, investAmount: number, s
             gSigner,
             token,
             sellingTokenAmount,
-            config.trade.slippage,
+            100,
             config.trade.prioFee,
             config.trade.sellTip
           )
@@ -147,7 +158,7 @@ async function sell(token: string, tokenBalance: number, investAmount: number, s
       }
       if (!simulation)
         tokenBalance = Number((await solTokenBalance(token, gSigner.publicKey))[0])
-    } catch (error) { 
+    } catch (error) {
       console.log(error)
     }
     await sleep(1000)

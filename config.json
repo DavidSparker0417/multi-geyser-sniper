@@ -1,10 +1,10 @@
 {
   "trade": {
     "enabled": true,
-    "simulation": true,
+    "simulation": false,
     "amount": 0.02,
-    "slippage": 10,
-    "prioFee": 1,
+    "slippage": 1,
+    "prioFee": 2,
     "buyTip": 0.0011,
     "sellTip": 0.0001,
     "tp": 15,

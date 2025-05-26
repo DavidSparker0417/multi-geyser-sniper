@@ -28,10 +28,10 @@ async function main() {
       )
     }
 
-    blxPumpNewMintStream(gSigner, (data: any) => {
-      // console.table(data)
-      detectionPf(data, grpcConf.length + 1)
-    })
+    // blxPumpNewMintStream(gSigner, (data: any) => {
+    //   // console.table(data)
+    //   detectionPf(data, grpcConf.length + 1)
+    // })
     // solTrGrpcWalletStart(config.suppliers, onSupplierTr)
     // trackerTask()
   } catch (error: any) {

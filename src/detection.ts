@@ -28,7 +28,7 @@ async function handlePfMint(data: any) {
     initialPrice: data.initialPrice,
     mintBlock: data.block
   }
-  console.table(tokenInfo)
+  // console.table(tokenInfo)
   if (tradingCount < 1)
     trade(tokenInfo)
 }
