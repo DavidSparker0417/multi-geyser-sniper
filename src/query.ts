@@ -16,7 +16,7 @@ export async function fetchMeta(tokenInfo: TokenInfo) {
     } catch (error) {}
     retryCnt ++
     // console.log(`[${token}] fetching meta retry(${retryCnt})`)
-    await sleep(300)
+    await sleep(1000)
   }
   console.timeEnd(`[${token}] Fetching meta`)
   if (!tokenMeta) {

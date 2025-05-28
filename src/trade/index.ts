@@ -1,10 +1,11 @@
-import { getCurrentTimestamp, sleep, SOL_ACCOUNT_RENT_FEE, solNonceCurrent, solPFBuy, solPFCalcAmountOut, solPFCalcTokenAmount, solPFFetchPrice, solPFSell, solTokenBalance, solTrGetBalanceChange } from "dv-sol-lib";
+import { getCurrentTimestamp, PumpfunBondInfo, sleep, SOL_ACCOUNT_RENT_FEE, solNonceCurrent, solNonceUpdate, solPFBuy, solPFCalcAmountOut, solPFCalcTokenAmount, solPFFetchPrice, solPFSell, solTokenBalance, solTrGetBalanceChange, solTrSwapInspect } from "dv-sol-lib";
 import { TokenInfo } from "../types";
 import { config } from "../config";
 import { reportBought } from "../alert";
 import { fetchMeta } from "../query";
 import { gSigner } from "..";
 import { TakeProfitManager } from "./takeProfit";
+import { PublicKey } from "@solana/web3.js";
 
 export let tradingCount = 0
 let totalProfit = 0
@@ -17,16 +18,26 @@ export async function trade(tokenInfo: TokenInfo) {
     return;
   }
 
+  // Validate token mint address
+  try {
+    new PublicKey(token);
+  } catch (error) {
+    console.log(`❌ [${token}] Invalid token mint address`);
+    return;
+  }
+
   console.log(`🚀 [${token}] Starting trade`)
-  fetchMeta(tokenInfo)
+  // fetchMeta(tokenInfo)
   // buy
+  let tx
   tradingCount++
-  let tokenBalance, investAmount
+  let tokenBalance = 0
+  let investAmount
   const simulation = config.trade.simulation
   if (config.trade.simulation) {
     while (true) {
       try {
-        tokenBalance = await solPFCalcAmountOut(token, config.trade.amount, true)
+        tokenBalance = Number(await solPFCalcAmountOut(token, config.trade.amount, true))
         if (tokenBalance) {
           tokenBalance *= 10 ** 6
           break
@@ -39,52 +50,49 @@ export async function trade(tokenInfo: TokenInfo) {
   }
   else {
     let retryCnt = 0
-    let tx
-    // while (retryCnt < 3) {
-    tx = await solPFBuy(
-      gSigner,
-      token,
-      config.trade.amount,
-      config.trade.slippage,
-      config.trade.prioFee,
-      config.trade.buyTip,
-      // {
-      //   type: "jito",
-      //   amount: config.trade.buyTip,
-      // },
-      tokenInfo.initialPrice,
-      tokenInfo.creator
-    )
-    if (tx) {
-      reportBought(token, tx, tokenInfo.mintBlock)
-      // break
-    } else {
-      console.log(`❌ [${token}] Failed to buy token with amount ${config.trade.amount} SOL`)
-      retryCnt++
-    }
-    // continue
-    // }
+    // while (retryCnt < 10) {
+    try {
+      tx = await solPFBuy(
+        gSigner,
+        token,
+        config.trade.amount,
+        config.trade.slippage,
+        config.trade.prioFee,
+        config.trade.buyTip,
+        // {
+        //   type: "astralane",
+        //   amount: config.trade.buyTip
+        // },
+        tokenInfo.initialPrice,
+        tokenInfo.creator
+      )
 
+      console.log(`[${token}] +++++++++++ bought tx :`, tx)
+      if (tx) {
+        reportBought(token, tx, tokenInfo.mintBlock)
+      } else {
+        console.log(`❌ [${token}] Failed to buy token with amount ${config.trade.amount} SOL`)
+        retryCnt++
+        solNonceUpdate()
+        // await sleep(500)
+      }
+    } catch (error: any) {
+      console.log(`❌ [${token}] Buy error:`, error.message)
+      if (error.logs) {
+        console.log(`[${token}] Transaction logs:`, error.logs)
+      }
+      retryCnt++
+      // await sleep(500)
+    }
+    // }
     if (!tx) {
       tradingCount--
       return
     }
 
-    // wait for buy confirmation
-    tokenBalance = (await solTokenBalance(token, gSigner.publicKey, 30))[0]
-    if (!tokenBalance) {
-      console.log(`[${token}] Failed to buy!`)
-      tradingCount--
-      return
-    }
-
-    investAmount = 0 - (await solTrGetBalanceChange(tx, undefined, true))
-    if (investAmount)
-      investAmount -= SOL_ACCOUNT_RENT_FEE
-    else
-      investAmount = config.trade.amount
+    investAmount = tx
   }
-  await sell(token, Number(tokenBalance), investAmount, simulation)
+  await sell(token, Number(tokenBalance), investAmount, tokenInfo.creator, simulation)
   tradingCount--
 }
 
@@ -93,6 +101,8 @@ function isNeedToSell(token: string, timePassed: number, percent: number, idleDu
     console.log(`⏰ [${token}] Timeout reached!`)
     return 100;
   }
+  if (!percent)
+    return 0
   if (percent - 100 > config.trade.tp) {
     console.log(`🎯 [${token}] TP reached! (${percent}%)`)
     return 100;
@@ -109,11 +119,26 @@ function isNeedToSell(token: string, timePassed: number, percent: number, idleDu
   return 0;
 }
 
-async function sell(token: string, tokenBalance: number, investAmount: number, simulation: boolean = false) {
-  const entryPrice = await solPFFetchPrice(token)
+async function sell(token: string, tokenBalance: number, investOrTx: number | string, creator: string, simulation: boolean = false) {
+  let entryPrice
   const tpManager = new TakeProfitManager()
-  tpManager.initializeToken(token, entryPrice, config.trade.takeProfits)
+  let bcInfo: PumpfunBondInfo|undefined = undefined
+  let investAmount: number = config.trade.amount
+  if (typeof investOrTx === 'number') {
+    entryPrice = await solPFFetchPrice(token)
+    investAmount = investOrTx
+  }
+  else {
+    const boughtInf: any = await solTrSwapInspect(investOrTx, "PumpFun")
+    // console.table(boughtInf)
+    tokenBalance = Number(boughtInf?.tokenAmount) || Number((await solTokenBalance(token, gSigner.publicKey, 30))[0])
+    entryPrice = boughtInf?.price || await solPFFetchPrice(token)
+    bcInfo = boughtInf?.bcInfo
+    solTrGetBalanceChange(investOrTx, undefined, true)
+      .then((value: number) => investAmount = value)
+  }
   // sell
+  tpManager.initializeToken(token, entryPrice, config.trade.takeProfits)
   const startTm = getCurrentTimestamp()
   let priceResetTm = getCurrentTimestamp()
   let sellTx
@@ -149,7 +174,8 @@ async function sell(token: string, tokenBalance: number, investAmount: number, s
             sellingTokenAmount,
             100,
             config.trade.prioFee,
-            config.trade.sellTip
+            config.trade.sellTip,
+            !curPrice ? bcInfo : undefined
           )
           if (sellTx) {
             returnedAmount += await solTrGetBalanceChange(sellTx)
@@ -157,12 +183,14 @@ async function sell(token: string, tokenBalance: number, investAmount: number, s
         }
         priceResetTm = getCurrentTimestamp()
       }
-      if (!simulation)
+      if (!simulation) {
         tokenBalance = Number((await solTokenBalance(token, gSigner.publicKey))[0])
+        console.log(`curTokenBalance =`, tokenBalance)
+      }
     } catch (error) {
-      console.log(error)
+      // console.log(error)
     }
-    await sleep(1000)
+    await sleep(500)
   }
 
   const profit = returnedAmount - investAmount
