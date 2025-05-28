@@ -3,7 +3,7 @@
     "enabled": true,
     "simulation": false,
     "amount": 0.02,
-    "slippage": 50,
+    "slippage": 10,
     "prioFee": 0,
     "buyTip": 0.001,
     "sellTip": 0.0002,
