@@ -1,9 +1,6 @@
-import { blxPumpNewMintStream, GrpcConfig, PF_MINT_AUTHORITY, PF_WALLET, solTrGrpcPfStart, solTrGrpcWalletStart, solWalletImport } from "dv-sol-lib";
-import { detectionPf, suppliers } from "./detection";
-import { config, loadGrpcConfig } from "./config";
-import { trackerTask } from "./tracker";
-import { access } from "fs";
-import { url } from "inspector";
+import { PF_MINT_AUTHORITY, PF_WALLET, solTrGrpcPfStart, solWalletImport } from "dv-sol-lib";
+import { detectionPf } from "./detection";
+import { loadGrpcConfig } from "./config";
 
 export const gSigner = solWalletImport(process.env.PRIVATE_KEY!)!
 
@@ -15,7 +12,6 @@ async function main() {
     const grpcConf = loadGrpcConfig()
     console.table(grpcConf)
 
-    // botStart()
     console.log(`---------------------------------------`)
     console.log(`👀 Starting monitor handlers ...`)
     for (let i = 0; i < grpcConf.length; i++) {
@@ -28,12 +24,6 @@ async function main() {
       )
     }
 
-    // blxPumpNewMintStream(gSigner, (data: any) => {
-    //   // console.table(data)
-    //   detectionPf(data, grpcConf.length + 1)
-    // })
-    // solTrGrpcWalletStart(config.suppliers, onSupplierTr)
-    // trackerTask()
   } catch (error: any) {
     console.error(`❌ Error : ${error.message}`)
   }

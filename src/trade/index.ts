@@ -2,9 +2,7 @@ import { getCurrentTimestamp, PumpfunBondInfo, sleep, SOL_ACCOUNT_RENT_FEE, solN
 import { TokenInfo } from "../types";
 import { config } from "../config";
 import { reportBought } from "../alert";
-import { fetchMeta } from "../query";
 import { gSigner } from "..";
-import { TakeProfitManager } from "./takeProfit";
 import { PublicKey } from "@solana/web3.js";
 
 export let tradingCount = 0
@@ -111,17 +109,11 @@ function isNeedToSell(token: string, timePassed: number, percent: number, idleDu
     console.log(`💔 [${token}] SL reached! (${percent}%)`)
     return 100;
   }
-  if (config.trade.idleSell.enabled && idleDuration > config.trade.idleSell.idleTime) {
-    console.log(`😴 [${token}] Idle sell triggered! (${idleDuration.toFixed(2)}s)`)
-    return config.trade.idleSell.sellPercentage
-  }
-
   return 0;
 }
 
 async function sell(token: string, tokenBalance: number, investOrTx: number | string, creator: string, simulation: boolean = false) {
   let entryPrice
-  const tpManager = new TakeProfitManager()
   let bcInfo: PumpfunBondInfo|undefined = undefined
   let investAmount: number = config.trade.amount
   if (typeof investOrTx === 'number') {
@@ -138,7 +130,6 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
       .then((value: number) => investAmount = value)
   }
   // sell
-  tpManager.initializeToken(token, entryPrice, config.trade.takeProfits)
   const startTm = getCurrentTimestamp()
   let priceResetTm = getCurrentTimestamp()
   let sellTx

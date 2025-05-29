@@ -1,7 +1,7 @@
 {
   "trade": {
     "enabled": true,
-    "simulation": false,
+    "simulation": true,
     "amount": 0.02,
     "slippage": 10,
     "prioFee": 0.2,
@@ -9,29 +9,6 @@
     "sellTip": 0.0002,
     "tp": 15,
     "sl": 95,
-    "timeout": 0, 
-    "idleSell": {
-      "enabled": false,
-      "idleTime": 10,
-      "sellPercentage": 25
-    },
-    "takeProfits": [
-      {
-        "percentage": 10,
-        "sellAmount": 25
-      },
-      {
-        "percentage": 20,
-        "sellAmount": 25
-      },
-      {
-        "percentage": 30,
-        "sellAmount": 25
-      },
-      {
-        "percentage": 50,
-        "sellAmount": 25
-      }
-    ]
+    "timeout": 0
   }
 }
