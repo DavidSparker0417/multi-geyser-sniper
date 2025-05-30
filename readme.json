@@ -14,10 +14,9 @@
       "6. Priority Fee : Solana transaction priority fee.(in lamport)",
       "7. Retry Count : If buy/sell transaction failed, bot will retry same as this number.",
       "8. Jito Tip : Jito tip amount",
-      "9. Blacklist : If the token creator is in this list, bot will not buy this token.",
-      "10. TP(%) : If the current price is over than this value compare with the bought price, sell tokens automatically.",
-      "11. SL : If the current price is less than this value compare with the bought price, sell tokens automatically.",
-      "12. Timeout : If the elapsed time since bought exceeds this value, sell tokens automatically"
+      "9. TP(%) : If the current price is over than this value compare with the bought price, sell tokens automatically.",
+      "10. SL : If the current price is less than this value compare with the bought price, sell tokens automatically.",
+      "11. Timeout : If the elapsed time since bought exceeds this value, sell tokens automatically"
     ],
     "2.Run Bot": [
       "1. Install Visual Studio Code(VSCode) on your local machine.",

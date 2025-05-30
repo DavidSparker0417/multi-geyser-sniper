@@ -7,10 +7,20 @@ import { PublicKey } from "@solana/web3.js";
 
 export let tradingCount = 0
 let totalProfit = 0
+let oldNonce:string|undefined = undefined
+async function updateNonce() {
+  while(!oldNonce || oldNonce === solNonceCurrent()) {
+    await solNonceUpdate()
+    console.log(`[nonce] Updating ... (${oldNonce} -> ${solNonceCurrent()})`)
+    await sleep(1000)
+  }
+  oldNonce = solNonceCurrent()
+}
 
 export async function trade(tokenInfo: TokenInfo) {
   const token = tokenInfo.mint
 
+  solNonceUpdate()
   if (!config.trade.enabled) {
     console.log(`[${token}] Trade is disabled. skipping ...`)
     return;
@@ -71,7 +81,6 @@ export async function trade(tokenInfo: TokenInfo) {
       } else {
         console.log(`❌ [${token}] Failed to buy token with amount ${config.trade.amount} SOL`)
         retryCnt++
-        solNonceUpdate()
         // await sleep(500)
       }
     } catch (error: any) {
@@ -83,6 +92,8 @@ export async function trade(tokenInfo: TokenInfo) {
       // await sleep(500)
     }
     // }
+    // updateNonce()
+    solNonceUpdate()
     if (!tx) {
       tradingCount--
       return

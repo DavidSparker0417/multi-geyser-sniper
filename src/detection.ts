@@ -28,17 +28,17 @@ async function handlePfMint(data: any, grpcId: number) {
     if (!blockTimeStamp) {
       return
     }
+
+    const delay = getCurrentTimestamp() - blockTimeStamp * 1000
+    console.log(`[(grpc-${grpcId})${token}](initialPrice:${data.initialPrice}) detection delay:`, delay)
+    // console.timeEnd('BolckTime')
+    // console.table(tokenInfo)
+    if (/*tradingCount < 1 && */delay < 800)
+      trade(tokenInfo)
   } catch (error) {
     // console.timeEnd('BolckTime')
     return
   }
-
-  const delay = getCurrentTimestamp() - blockTimeStamp * 1000
-  console.log(`[(grpc-${grpcId})${token}] detection delay:`, delay)
-  // console.timeEnd('BolckTime')
-  // console.table(tokenInfo)
-  if (/*tradingCount < 1 && */delay < 600)
-    trade(tokenInfo)
 }
 
 export function detectionPf(data: any, grpcId: number) {
