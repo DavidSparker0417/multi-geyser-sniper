@@ -3,12 +3,35 @@
     "enabled": true,
     "simulation": false,
     "amount": 0.02,
-    "slippage": 15,
-    "prioFee": 1,
-    "buyTip": 0.005,
+    "slippage": 50,
+    "prioFee": 0,
+    "buyTip": 0.001,
     "sellTip": 0.0002,
     "tp": 15,
     "sl": 95,
-    "timeout": 0
+    "timeout": 0, 
+    "idleSell": {
+      "enabled": false,
+      "idleTime": 10,
+      "sellPercentage": 25
+    },
+    "takeProfits": [
+      {
+        "percentage": 10,
+        "sellAmount": 25
+      },
+      {
+        "percentage": 20,
+        "sellAmount": 25
+      },
+      {
+        "percentage": 30,
+        "sellAmount": 25
+      },
+      {
+        "percentage": 50,
+        "sellAmount": 25
+      }
+    ]
   }
 }

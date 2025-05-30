@@ -13,6 +13,15 @@ interface TradeConfig {
   tp: number;
   sl: number;
   timeout: number;
+  idleSell: {
+    enabled: boolean;
+    idleTime: number;
+    sellPercentage: number;
+  },
+  takeProfits: {
+    percentage: number;
+    sellAmount: number;
+  }[]
 }
 
 interface Config {
