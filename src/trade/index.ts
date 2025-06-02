@@ -1,18 +1,20 @@
-import { getCurrentTimestamp, PumpfunBondInfo, sleep, SOL_ACCOUNT_RENT_FEE, solNonceCurrent, solNonceUpdate, solPFBuy, solPFCalcAmountOut, solPFCalcTokenAmount, solPFFetchPrice, solPFSell, solTokenBalance, solTrGetBalanceChange, solTrSwapInspect } from "dv-sol-lib";
+import { extractParsingData, getCurrentTimestamp, grpcPFProgramCallback, PumpfunBondInfo, sleep, SOL_ACCOUNT_RENT_FEE, solGrpcStart, solGrpcStop, solNonceCurrent, solNonceUpdate, solPFBuy, solPFCalcAmountOut, solPFCalcTokenAmount, solPFFetchPrice, solPFSell, solPfSwapSell, solTokenBalance, solTrGetBalanceChange, solTrGrpcPfCallback, solTrGrpcPfStart, solTrGrpcPumpSwapCallback, solTrSwapInspect, solWalletImport } from "dv-sol-lib";
 import { TokenInfo } from "../types";
 import { config } from "../config";
 import { reportBought } from "../alert";
 import { fetchMeta } from "../query";
-import { gSigner } from "..";
 import { TakeProfitManager } from "./takeProfit";
-import { PublicKey } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 
+export const gSigner = solWalletImport(process.env.PRIVATE_KEY!)!
 export let tradingCount = 0
 let totalProfit = 0
+const tradingTokens: Map<string, TokenInfo> = new Map()
 
 export async function trade(tokenInfo: TokenInfo) {
   const token = tokenInfo.mint
 
+  solNonceUpdate()
   if (!config.trade.enabled) {
     console.log(`[${token}] Trade is disabled. skipping ...`)
     return;
@@ -27,6 +29,7 @@ export async function trade(tokenInfo: TokenInfo) {
   }
 
   console.log(`🚀 [${token}] Starting trade`)
+  tradingTokens.set(token, tokenInfo)
   // fetchMeta(tokenInfo)
   // buy
   let tx
@@ -64,7 +67,8 @@ export async function trade(tokenInfo: TokenInfo) {
         //   amount: config.trade.buyTip
         // },
         tokenInfo.initialPrice,
-        tokenInfo.creator
+        tokenInfo.creator,
+        config.trade.computeUnits
       )
 
       console.log(`[${token}] +++++++++++ bought tx :`, tx)
@@ -87,43 +91,84 @@ export async function trade(tokenInfo: TokenInfo) {
     // }
     if (!tx) {
       tradingCount--
+      tradingTokens.delete(token)
       return
     }
 
     investAmount = tx
   }
   await sell(token, Number(tokenBalance), investAmount, tokenInfo.creator, simulation)
+  tradingTokens.delete(token)
   tradingCount--
-}
-
-function isNeedToSell(token: string, timePassed: number, percent: number, idleDuration: number): number {
-  if (timePassed > config.trade.timeout) {
-    console.log(`⏰ [${token}] Timeout reached!`)
-    return 100;
-  }
-  if (!percent)
-    return 0
-  if (percent - 100 > config.trade.tp) {
-    console.log(`🎯 [${token}] TP reached! (${percent}%)`)
-    return 100;
-  }
-  if (100 - percent > config.trade.sl) {
-    console.log(`💔 [${token}] SL reached! (${percent}%)`)
-    return 100;
-  }
-  if (config.trade.idleSell.enabled && idleDuration > config.trade.idleSell.idleTime) {
-    console.log(`😴 [${token}] Idle sell triggered! (${idleDuration.toFixed(2)}s)`)
-    return config.trade.idleSell.sellPercentage
-  }
-
-  return 0;
 }
 
 async function sell(token: string, tokenBalance: number, investOrTx: number | string, creator: string, simulation: boolean = false) {
   let entryPrice
-  const tpManager = new TakeProfitManager()
-  let bcInfo: PumpfunBondInfo|undefined = undefined
+  let bcInfo: PumpfunBondInfo | undefined = undefined
   let investAmount: number = config.trade.amount
+  let evPrice = 0
+  let devSellPercent = 0
+  let devSellTrigger = 0
+  let migrationTrigger = 0
+
+  function pumpfunTokenTrEvHandler(data: any) {
+    if (!data)
+      return
+    switch (data.type) {
+      case 'AddLiquidity': // migration to pumpswap
+        migrationTrigger = config.trade.migrationSell
+        const tInfo = tradingTokens.get(token)
+        if (tInfo) {
+          tInfo.migrated = true
+        }
+        break;
+      case 'Trade':
+        evPrice = data.price
+        if (data.who === creator && data.how === 'sell') {
+          const tokenInfo = tradingTokens.get(token)
+          if (tokenInfo && tokenInfo.devBuy) {
+            devSellPercent = (data.tokenAmount / tokenInfo.devAmount) * 100
+            console.log(`+++++++++++++ dev sell! ${devSellPercent} %`)
+            if (config.trade.devSell.enable && devSellPercent >= config.trade.devSell.triggerPercent) {
+              devSellTrigger = config.trade.devSell.sellPercent
+            }
+          }
+        }
+        break;
+      default:
+        return
+    }
+  }
+
+  function pumpswapTokenTrEvHandler(data: any) {
+    if (!data)
+      return
+    if (data.type !== 'Trade')
+      return
+    evPrice = data.price * (10**3)
+    if (data.how == 'sell' && data.who === creator) {
+      const tokenInfo = tradingTokens.get(token)
+      if (!tokenInfo)
+        return
+      devSellPercent = (data.tokenAmount / tokenInfo.devAmount) * 100
+      console.log(`+++++++++++++ dev sell! ${devSellPercent} %`)
+      if (config.trade.devSell.enable && devSellPercent >= config.trade.devSell.triggerPercent) {
+        devSellTrigger = config.trade.devSell.sellPercent
+      }
+    }
+  }
+
+  solGrpcStart([token], (data: any) => {
+    const tokenInfo = tradingTokens.get(token)
+    if (!tokenInfo)
+      return
+    if (tokenInfo.migrated) {
+      solTrGrpcPumpSwapCallback(data, pumpswapTokenTrEvHandler)
+    } else {
+      solTrGrpcPfCallback(data, pumpfunTokenTrEvHandler)
+    }
+  })
+
   if (typeof investOrTx === 'number') {
     entryPrice = await solPFFetchPrice(token)
     investAmount = investOrTx
@@ -138,7 +183,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
       .then((value: number) => investAmount = value)
   }
   // sell
-  tpManager.initializeToken(token, entryPrice, config.trade.takeProfits)
+  const tpManager = new TakeProfitManager(token, entryPrice, config.trade.takeProfits)
   const startTm = getCurrentTimestamp()
   let priceResetTm = getCurrentTimestamp()
   let sellTx
@@ -149,7 +194,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
     try {
       const curTm = getCurrentTimestamp()
       const passedTime = (curTm - startTm) / 1000
-      const curPrice = await solPFFetchPrice(token)
+      const curPrice = evPrice || await solPFFetchPrice(token)
       const percent = (curPrice / entryPrice) * 100
       if (prePrice !== curPrice) {
         prePrice = curPrice
@@ -157,7 +202,16 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
       }
       const idleDuration = (getCurrentTimestamp() - priceResetTm) / 1000
       console.log(`[${token}] ------------- (${curPrice}/${entryPrice}) (${percent} %) passed: ${passedTime.toFixed(2)}, curReturned : ${returnedAmount}`)
-      const sellPercent = isNeedToSell(token, passedTime, percent, idleDuration)
+      let sellPercent = tpManager.checkTakeProfits(token, curPrice, idleDuration)
+      if (!sellPercent && devSellTrigger) {
+        sellPercent = devSellTrigger
+        devSellTrigger = 0
+      }
+      if (!sellPercent && migrationTrigger) {
+        sellPercent = migrationTrigger
+        migrationTrigger = 0
+      }
+
       if (sellPercent) {
         let sellingTokenAmount = sellPercent >= 100 ? tokenBalance : initialBalance * sellPercent / 100
         sellingTokenAmount = Math.floor(sellingTokenAmount)
@@ -167,32 +221,53 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
         if (simulation) {
           returnedAmount += await solPFCalcAmountOut(token, sellingTokenAmount, false)
           tokenBalance -= sellingTokenAmount
+          sellTx = "simulate"
         } else {
-          sellTx = await solPFSell(
-            gSigner,
-            token,
-            sellingTokenAmount,
-            100,
-            config.trade.prioFee,
-            config.trade.sellTip,
-            !curPrice ? bcInfo : undefined
-          )
-          if (sellTx) {
-            returnedAmount += await solTrGetBalanceChange(sellTx)
+          let sellRetry = 0
+          while (sellRetry < config.trade.sellRetry) {
+            const tokenInfo = tradingTokens.get(token)
+            if (tokenInfo?.migrated) {
+              sellTx = await solPfSwapSell(
+                gSigner,
+                token,
+                sellingTokenAmount,
+                config.trade.slippage,
+                config.trade.sellTip
+              )
+            } else {
+              sellTx = await solPFSell(
+                gSigner,
+                token,
+                sellingTokenAmount,
+                100,
+                config.trade.prioFee,
+                config.trade.sellTip,
+                !curPrice ? bcInfo : undefined
+              )
+            }
+            if (sellTx) {
+              returnedAmount += await solTrGetBalanceChange(sellTx)
+              break
+            } else {
+              sellRetry++
+            }
           }
         }
-        priceResetTm = getCurrentTimestamp()
       }
       if (!simulation) {
         tokenBalance = Number((await solTokenBalance(token, gSigner.publicKey))[0])
-        console.log(`curTokenBalance =`, tokenBalance)
+      }
+      if (sellTx) {
+        priceResetTm = getCurrentTimestamp()
+        tpManager.markupLevel(token, curPrice)
       }
     } catch (error) {
       // console.log(error)
     }
-    await sleep(500)
+    await sleep(1500)
   }
 
+  solGrpcStop(token)
   const profit = returnedAmount - investAmount
   totalProfit += profit
   console.log(`[${token}] Trade finised! profit = ${profit}`)

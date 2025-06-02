@@ -12,6 +12,7 @@ import { TokenCache } from './cache';
 import { TokenInfo } from './types';
 import { trade } from './trade';
 import { tradingCount } from './trade';
+import { fetchMeta } from './query';
 
 export let buyCountsInMintBlock: any = {}
 export const buyingAssets: any = {}
@@ -26,10 +27,15 @@ async function handlePfMint(data: any) {
     mint: token,
     creator: data.creator,
     initialPrice: data.initialPrice,
-    mintBlock: data.block
+    devBuy: data.initialBuy,
+    devAmount: data.initialTokenAmount,
+    mintBlock: data.block,
+    migrated: false
   }
-  // console.table(tokenInfo)
-  if (tradingCount < 1)
+  fetchMeta(tokenInfo)
+  if (config.devBuyBlacklist.includes(parseFloat(tokenInfo.devBuy.toFixed(3))))
+    return
+  if (tradingCount < 1 || config.whitelist.includes(tokenInfo.creator))
     trade(tokenInfo)
 }
 

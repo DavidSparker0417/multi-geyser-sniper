@@ -1,37 +1,47 @@
 {
   "trade": {
     "enabled": true,
-    "simulation": false,
-    "amount": 0.02,
+    "simulation": true,
+    "amount": 0.01,
     "slippage": 50,
     "prioFee": 0,
-    "buyTip": 0.001,
-    "sellTip": 0.0002,
-    "tp": 15,
+    "buyTip": 0.0001,
+    "sellTip": 0.0001,
+    "tp": 1000,
     "sl": 95,
-    "timeout": 0, 
+    "timeout": 60, 
+    "sellRetry": 3,
     "idleSell": {
       "enabled": false,
       "idleTime": 10,
       "sellPercentage": 25
     },
+    "migrationSell": 20,
+    "multiTrailing": true,
     "takeProfits": [
       {
-        "percentage": 10,
-        "sellAmount": 25
+        "percentage": 100,
+        "sellPercent": 25
       },
       {
-        "percentage": 20,
-        "sellAmount": 25
+        "percentage": 200,
+        "sellPercent": 25
       },
       {
-        "percentage": 30,
-        "sellAmount": 25
+        "percentage": 500,
+        "sellPercent": 25
       },
       {
-        "percentage": 50,
-        "sellAmount": 25
+        "percentage": 2000,
+        "sellPercent": 25
       }
-    ]
-  }
+    ],
+    "devSell": {
+      "enable": false,
+      "triggerPercent": 50,
+      "sellPercent": 25
+    }
+  },
+  "whitelist": [],
+  "devBuyBlacklist": []
 }

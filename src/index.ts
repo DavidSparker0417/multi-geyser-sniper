@@ -4,8 +4,7 @@ import { config, loadGrpcConfig } from "./config";
 import { trackerTask } from "./tracker";
 import { access } from "fs";
 import { url } from "inspector";
-
-export const gSigner = solWalletImport(process.env.PRIVATE_KEY!)!
+import { gSigner } from "./trade";
 
 async function main() {
   try {

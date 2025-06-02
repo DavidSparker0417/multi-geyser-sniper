@@ -10,22 +10,33 @@ interface TradeConfig {
   prioFee: number;
   buyTip: number;
   sellTip: number;
+  computeUnits?: number;
   tp: number;
   sl: number;
   timeout: number;
+  sellRetry: number;
   idleSell: {
     enabled: boolean;
     idleTime: number;
     sellPercentage: number;
   },
+  multiTrailing: boolean;
   takeProfits: {
     percentage: number;
-    sellAmount: number;
-  }[]
+    sellPercent: number;
+  }[],
+  devSell: {
+    enable: boolean;
+    triggerPercent: number;
+    sellPercent: number;
+  },
+  migrationSell: number;
 }
 
 interface Config {
-  trade: TradeConfig
+  trade: TradeConfig;
+  whitelist: string[];
+  devBuyBlacklist: number[];
 }
 
 export let config: Config
