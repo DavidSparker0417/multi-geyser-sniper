@@ -37,6 +37,7 @@ interface Config {
   trade: TradeConfig;
   whitelist: string[];
   devBuyBlacklist: number[];
+  liquidityRange: number[];
 }
 
 export let config: Config

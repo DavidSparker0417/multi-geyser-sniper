@@ -43,5 +43,6 @@
     }
   },
   "whitelist": [],
-  "devBuyBlacklist": []
+  "devBuyBlacklist": [],
+  "liquidityRange": [30, 38]
 }
