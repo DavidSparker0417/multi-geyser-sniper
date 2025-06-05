@@ -1,18 +1,18 @@
 {
   "trade": {
     "enabled": true,
-    "simulation": true,
+    "simulation": false,
     "amount": 0.01,
     "slippage": 50,
     "prioFee": 0,
     "buyTip": 0.0001,
     "sellTip": 0.0001,
-    "tp": 1000,
-    "sl": 95,
-    "timeout": 60, 
+    "tp": 20,
+    "sl": 15,
+    "timeout": 200, 
     "sellRetry": 3,
     "idleSell": {
-      "enabled": false,
+      "enabled": true,
       "idleTime": 10,
       "sellPercentage": 25
     },
@@ -20,19 +20,11 @@
     "multiTrailing": true,
     "takeProfits": [
       {
-        "percentage": 100,
+        "percentage": 5,
         "sellPercent": 25
       },
       {
-        "percentage": 200,
-        "sellPercent": 25
-      },
-      {
-        "percentage": 500,
-        "sellPercent": 25
-      },
-      {
-        "percentage": 2000,
+        "percentage": 10,
         "sellPercent": 25
       }
     ],

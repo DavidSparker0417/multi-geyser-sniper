@@ -186,12 +186,12 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
   const tpManager = new TakeProfitManager(token, entryPrice, config.trade.takeProfits)
   const startTm = getCurrentTimestamp()
   let priceResetTm = getCurrentTimestamp()
-  let sellTx
   let prePrice = 0
   let returnedAmount = 0
   const initialBalance = tokenBalance
   while (tokenBalance) {
     try {
+      let sellTx = undefined
       const curTm = getCurrentTimestamp()
       const passedTime = (curTm - startTm) / 1000
       const curPrice = evPrice || await solPFFetchPrice(token)
@@ -215,7 +215,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
       if (sellPercent) {
         let sellingTokenAmount = sellPercent >= 100 ? tokenBalance : initialBalance * sellPercent / 100
         sellingTokenAmount = Math.floor(sellingTokenAmount)
-        if (sellingTokenAmount > tokenBalance)
+        if (sellingTokenAmount > tokenBalance || (tokenBalance - sellingTokenAmount) < 100000)
           sellingTokenAmount = tokenBalance
         console.log(`[${token}] Selling for ${sellingTokenAmount}`)
         if (simulation) {
