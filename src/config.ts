@@ -1,4 +1,3 @@
-
 import { GrpcConfig, sleep } from "dv-sol-lib"
 import * as fs from 'fs';
 
@@ -19,6 +18,13 @@ interface TradeConfig {
     enabled: boolean;
     idleTime: number;
     sellPercentage: number;
+  },
+  trailingStop: {
+    enabled: boolean;
+    levels: {
+      trailingPercent: number;
+      sellPercent: number;
+    }[];
   },
   multiTrailing: boolean;
   takeProfits: {

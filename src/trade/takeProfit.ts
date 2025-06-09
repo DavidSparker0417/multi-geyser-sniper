@@ -7,10 +7,18 @@ interface TakeProfitLevel {
     executed: boolean;
 }
 
+interface TrailingStopLevel {
+    trailingPercent: number;
+    sellPercent: number;
+    executed: boolean;
+}
+
 interface TokenTakeProfit {
     mintAddress: string;
     entryPrice: number;
     takeProfitLevels: TakeProfitLevel[];
+    trailingStopLevels: TrailingStopLevel[];
+    highestPrice: number;
 }
 
 export class TakeProfitManager {
@@ -40,10 +48,17 @@ export class TakeProfitManager {
             executed: false
         }));
 
+        const trailingLevels = config.trade.trailingStop.levels.map(level => ({
+            ...level,
+            executed: false
+        }));
+
         this.tokenTakeProfits.set(mintAddress, {
             mintAddress,
             entryPrice,
-            takeProfitLevels: levels
+            takeProfitLevels: levels,
+            trailingStopLevels: trailingLevels,
+            highestPrice: entryPrice
         });
     }
 
@@ -67,18 +82,34 @@ export class TakeProfitManager {
             return config.trade.idleSell.sellPercentage
         }
 
-
         const tokenData = this.tokenTakeProfits.get(mintAddress);
         if (!tokenData) return 0;
 
-
         const profitPercentage = ((currentPrice - tokenData.entryPrice) / tokenData.entryPrice) * 100;
+
+        // Handle multi-trailing stop loss if enabled
+        if (config.trade.trailingStop.enabled) {
+            // Update highest price if price increases
+            if (currentPrice > tokenData.highestPrice) {
+                tokenData.highestPrice = currentPrice;
+                console.log(`📈 [${mintAddress}] New high: ${currentPrice}`);
+            }
+
+            // Check trailing stop levels
+            for (const level of tokenData.trailingStopLevels) {
+                if (!level.executed) {
+                    const trailingStopPrice = tokenData.highestPrice * (1 - level.trailingPercent / 100);
+                    if (currentPrice < trailingStopPrice) {
+                        level.executed = true;
+                        console.log(`😢 [${mintAddress}] Trailing stop triggered at ${level.trailingPercent}% below high, selling ${level.sellPercent}%`);
+                        return level.sellPercent;
+                    }
+                }
+            }
+        }
+
         if (profitPercentage > config.trade.tp) {
             console.log(`🎯 [${mintAddress}] TP reached! (${profitPercentage}%)`)
-            return 100
-        }
-        if ((0-profitPercentage) > config.trade.sl) {
-            console.log(`😢 [${mintAddress}] SL reached! (${profitPercentage}%)`)
             return 100
         }
 

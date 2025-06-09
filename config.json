@@ -1,23 +1,40 @@
 {
   "trade": {
     "enabled": true,
-    "simulation": false,
+    "simulation": true,
     "amount": 0.01,
     "slippage": 50,
     "prioFee": 0,
     "buyTip": 0.0001,
     "sellTip": 0.0001,
-    "tp": 20,
-    "sl": 15,
+    "tp": 100,
+    "sl": 95,
     "timeout": 200, 
     "sellRetry": 3,
     "idleSell": {
-      "enabled": true,
+      "enabled": false,
       "idleTime": 10,
       "sellPercentage": 25
     },
     "migrationSell": 20,
-    "multiTrailing": true,
+    "trailingStop": {
+      "enabled": true,
+      "levels": [
+        {
+          "trailingPercent": 3,
+          "sellPercent": 25
+        },
+        {
+          "trailingPercent": 5,
+          "sellPercent": 25
+        },
+        {
+          "trailingPercent": 8,
+          "sellPercent": 50
+        }
+      ]
+    },
+    "multiTrailing": false,
     "takeProfits": [
       {
         "percentage": 5,
@@ -34,7 +51,34 @@
       "sellPercent": 25
     }
   },
-  "whitelist": [],
+  "whitelist": [
+    "7CGdExURgiqjUAYBzBiQLKkvhkfVW4jm2xfinzLRRuZ2",
+    "RgwAigpRpFNgtCJkU6ijhafQD7A4LyYJgCeJro7Hg8r",
+    "Gv1FH5S4QFoL8yghMk3y1yZhk6XSegJRbGFqQ9tYiw17",
+    "2hYfy3NSfBCbAq6VDFqTJ4TsxeVAr8MB7a64tKmyZhDW",
+    "HMH3swbaCtpSaufX3gJXodrdSG5DMjpkJgPhjQU53Kxc",
+    "BjCBPzbx9eA4ia3daHdx6rGv94j6hNfm8V4UtDU4v4ma",
+    "CweChGUpCEciP4d36RFAcq9y4seD6H795VudJcjyn6bj",
+    "2iznpS5Tu7BSfjPcLYwbwzzfmEthG3bB7Ge3EPmZ3gaY",
+    "Gv1FH5S4QFoL8yghMk3y1yZhk6XSegJRbGFqQ9tYiw17",
+    "BUo8AVbxfV2FsTzm19HUsraPzghKDTm1bEfn4Yrp2VJm",
+    "9cxLzxjrTeodcbaEU3KCNGE1a4yFZEcdJ7uEXN378S4U",
+    "q3UsQiR414NiydDgfPPCZMbxTETnts47nHt4fd8Qv7v",
+    "DeVi8MHXJBsccxo114HSNEbqy4aMXEe7frJZCnEpkHDo",
+    "7cNEoEf3LUUbdM6R6B9RE2FcyE9Zqg9YGWtt7KuAc8ws",
+    "AcXENdJXAfnneAtRhxeFrMjp3FbucVxNZtYL8LJvNv73",
+    "4pMQrW7frnmxq1WCrcC9BEJ3SCPbBXupHhMAubasypoV",
+    "CBhPfZ4Q7CbuHzwkmTDpFXNxncoRA7N4k5dQBuiaKdpj",
+    "CXLQ7ZhyqmkkeQ7VknUbbp8Awgda6bRQY4eSuWbJUYMS",
+    "5h3o1HKaiLd4AGmKbGNiz6xCZWHoNKMGDPFh5XH8Ad1P",
+    "4n5gPsbp8aHRgMkGtnC7sXR4z3nxMRWYmNknm28bX3XQ",
+    "7XuB5q6itmtDNLav29EjwJJ3s9YNBWEaK8BxYzkob4si",
+    "F5zfxfbRtjb8Apn75MRY9mKUsJyfe56wmSPKUqfv6tCo",
+    "6wUCb7MVxaZAdghX6MSbZMqJCt38YyZM6B7yEVGsxgih",
+    "5Bswu9ZgC3WAdy9LYNXJnQ2WWB8NVtKj6S6xWsL675Ez",
+    "DXupPEfmQTGLXqs2T3HJDJa8VJajwdefiGuvhsjb41d8",
+    "pCZMrFusffaoNDSp9PDNf2tuY34PeEmng76AcXWhCmc"
+  ],
   "devBuyBlacklist": [],
   "liquidityRange": [30, 38]
 }

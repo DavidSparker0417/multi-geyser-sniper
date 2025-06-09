@@ -182,6 +182,13 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
     solTrGetBalanceChange(investOrTx, undefined, true)
       .then((value: number) => investAmount = value)
   }
+
+  while(!entryPrice) {
+    entryPrice = await solPFFetchPrice(token)
+    if (!entryPrice)
+      await sleep(1000)
+  }
+  
   // sell
   const tpManager = new TakeProfitManager(token, entryPrice, config.trade.takeProfits)
   const startTm = getCurrentTimestamp()

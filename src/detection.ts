@@ -37,9 +37,9 @@ async function handlePfMint(data: any) {
   if (config.devBuyBlacklist.includes(parseFloat(tokenInfo.devBuy.toFixed(3))))
     return
   const initialLiq = data.initialLiq
-  if (initialLiq < config.liquidityRange[0] || initialLiq > config.liquidityRange[1])
-    return
-  if (tradingCount < 1 || config.whitelist.includes(tokenInfo.creator))
+  // if (initialLiq < config.liquidityRange[0] || initialLiq > config.liquidityRange[1])
+  //   return
+  if (/*tradingCount < 1 || */config.whitelist.includes(tokenInfo.creator))
     trade(tokenInfo)
 }
 
