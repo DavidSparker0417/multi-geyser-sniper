@@ -21,6 +21,23 @@ export const suppliers: string[] = []
 export let trackerList: string[] = []
 const tokenCache = new TokenCache()
 
+function filterTrade(tokenInfo: TokenInfo): boolean {
+  if (!config.whitelist.includes(tokenInfo.creator)) {
+    // console.log(`[filterTrade] Token ${tokenInfo.mint} rejected: Creator not in whitelist`)
+    return false
+  }
+  if (config.devBuyBlacklist.includes(Number(tokenInfo.devBuy.toFixed(3)))) {
+    console.log(`[filterTrade] Token ${tokenInfo.mint} rejected: Dev buy amount ${tokenInfo.devBuy} in blacklist`)
+    return false
+  }
+  // if (tradingCount > 0) {
+    //  console.log(`[filterTrade] Token ${tokenInfo.mint} rejected: Trading count > 0 (${tradingCount})`)
+    // return false
+  // }
+  // console.log(`[filterTrade] Token ${tokenInfo.mint} accepted for trading`)
+  return true
+}
+
 async function handlePfMint(data: any) {
   const token = data.token
   const tokenInfo: TokenInfo = {
@@ -34,12 +51,10 @@ async function handlePfMint(data: any) {
   }
   // console.table(data)
   // fetchMeta(tokenInfo)
-  if (config.devBuyBlacklist.includes(parseFloat(tokenInfo.devBuy.toFixed(3))))
-    return
   const initialLiq = data.initialLiq
   // if (initialLiq < config.liquidityRange[0] || initialLiq > config.liquidityRange[1])
   //   return
-  if (/*tradingCount < 1 || */config.whitelist.includes(tokenInfo.creator))
+  if (filterTrade(tokenInfo))
     trade(tokenInfo)
 }
 

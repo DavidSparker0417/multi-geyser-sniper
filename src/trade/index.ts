@@ -97,7 +97,8 @@ export async function trade(tokenInfo: TokenInfo) {
 
     investAmount = tx
   }
-  await sell(token, Number(tokenBalance), investAmount, tokenInfo.creator, simulation)
+  if (config.trade.activeSale)
+    await sell(token, Number(tokenBalance), investAmount, tokenInfo.creator, simulation)
   tradingTokens.delete(token)
   tradingCount--
 }

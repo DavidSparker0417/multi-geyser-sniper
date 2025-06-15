@@ -4,6 +4,7 @@ import * as fs from 'fs';
 interface TradeConfig {
   enabled: boolean;
   simulation: boolean,
+  activeSale: boolean,
   amount: number;
   slippage: number;
   prioFee: number;
