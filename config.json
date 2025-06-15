@@ -1,7 +1,7 @@
 {
   "trade": {
     "enabled": true,
-    "activeSale": false,
+    "activeSale": true,
     "simulation": true,
     "amount": 0.02,
     "slippage": 100,
