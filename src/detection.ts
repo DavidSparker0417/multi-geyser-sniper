@@ -12,7 +12,7 @@ import { TokenCache } from './cache';
 import { TokenInfo } from './types';
 import { trade } from './trade';
 import { tradingCount } from './trade';
-import { fetchMeta } from './query';
+import { tradeHistoryService } from './db';
 
 export let buyCountsInMintBlock: any = {}
 export const buyingAssets: any = {}
@@ -21,13 +21,23 @@ export const suppliers: string[] = []
 export let trackerList: string[] = []
 const tokenCache = new TokenCache()
 
-function filterTrade(tokenInfo: TokenInfo): boolean {
+async function filterTrade(tokenInfo: TokenInfo): Promise<boolean> {
   if (!config.whitelist.includes(tokenInfo.creator)) {
     // console.log(`[filterTrade] Token ${tokenInfo.mint} rejected: Creator not in whitelist`)
     return false
   }
   if (config.devBuyBlacklist.includes(Number(tokenInfo.devBuy.toFixed(3)))) {
     console.log(`[filterTrade] Token ${tokenInfo.mint} rejected: Dev buy amount ${tokenInfo.devBuy} in blacklist`)
+    return false
+  }
+
+  if ((await tradeHistoryService.getTradeHistoryByName(tokenInfo.name)).length > 0) {
+    console.log(`[filterTrade] Token ${tokenInfo.name} rejected: Trade history exists`)
+    return false
+  }
+
+  if ((await tradeHistoryService.getTradeHistoryBySymbol(tokenInfo.symbol)).length > 0) {
+    console.log(`[filterTrade] Token ${tokenInfo.symbol} rejected: Trade history exists`)
     return false
   }
   // if (tradingCount > 0) {
@@ -43,6 +53,8 @@ async function handlePfMint(data: any) {
   const tokenInfo: TokenInfo = {
     mint: token,
     creator: data.creator,
+    name: data.name,
+    symbol: data.symbol,
     initialPrice: data.initialPrice,
     devBuy: data.initialBuy,
     devAmount: data.initialTokenAmount,
@@ -50,11 +62,10 @@ async function handlePfMint(data: any) {
     migrated: false
   }
   // console.table(data)
-  // fetchMeta(tokenInfo)
   const initialLiq = data.initialLiq
   // if (initialLiq < config.liquidityRange[0] || initialLiq > config.liquidityRange[1])
   //   return
-  if (filterTrade(tokenInfo))
+  if (await filterTrade(tokenInfo))
     trade(tokenInfo)
 }
 

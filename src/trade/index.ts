@@ -5,6 +5,7 @@ import { reportBought } from "../alert";
 import { fetchMeta } from "../query";
 import { TakeProfitManager } from "./takeProfit";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { tradeHistoryService } from "../db";
 
 export const gSigner = solWalletImport(process.env.PRIVATE_KEY!)!
 export let tradingCount = 0
@@ -97,6 +98,14 @@ export async function trade(tokenInfo: TokenInfo) {
 
     investAmount = tx
   }
+  tradeHistoryService.createTradeRecord({
+    mint: token,
+    name: tokenInfo.name,
+    symbol: tokenInfo.symbol,
+    creator: tokenInfo.creator,
+    devBuy: tokenInfo.devBuy,
+    txHash: tx,
+  })
   if (config.trade.activeSale)
     await sell(token, Number(tokenBalance), investAmount, tokenInfo.creator, simulation)
   tradingTokens.delete(token)
