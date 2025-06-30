@@ -27,17 +27,17 @@ async function filterTrade(tokenInfo: TokenInfo): Promise<boolean> {
     return false
   }
   if (config.devBuyBlacklist.includes(Number(tokenInfo.devBuy.toFixed(3)))) {
-    console.log(`[filterTrade] Token ${tokenInfo.mint} rejected: Dev buy amount ${tokenInfo.devBuy} in blacklist`)
+    console.log(`[${tokenInfo.mint}] Token rejected: Dev buy amount ${tokenInfo.devBuy} in blacklist`)
     return false
   }
 
   if ((await tradeHistoryService.getTradeHistoryByName(tokenInfo.name)).length > 0) {
-    console.log(`[filterTrade] Token ${tokenInfo.name} rejected: Trade history exists`)
+    console.log(`[${tokenInfo.mint}] Token (${tokenInfo.name}) rejected: Trade history exists`)
     return false
   }
 
   if ((await tradeHistoryService.getTradeHistoryBySymbol(tokenInfo.symbol)).length > 0) {
-    console.log(`[filterTrade] Token ${tokenInfo.symbol} rejected: Trade history exists`)
+    console.log(`[${tokenInfo.mint}] Token (${tokenInfo.symbol}) rejected: Trade history exists`)
     return false
   }
   // if (tradingCount > 0) {
@@ -73,8 +73,10 @@ export function detectionPf(data: any, grpcId: number) {
   switch (data.type) {
     case 'Mint':
       const token = data.token
-      if (tokenCache.has(token))
+      if (tokenCache.has(token)) {
+        // console.log(`(GRPC-${grpcId}) ${token} rejected: Token already in cache`)
         break;
+      }
       tokenCache.add(token)
       reportDetectionTime(`(GRPC-${grpcId}) ${token}`, data.block, undefined, `(initialPrice = ${data.initialPrice}, devBuy = ${data.initialBuy})`)
       handlePfMint(data)

@@ -106,6 +106,12 @@ export class TakeProfitManager {
                     }
                 }
             }
+        } else {
+            const sl = 0 - profitPercentage
+            if (sl > config.trade.sl) {
+                console.log(`😢 [${mintAddress}] SL triggered at ${sl} % below entry, selling 100%`)
+                return 100
+            }
         }
 
         if (profitPercentage > config.trade.tp) {

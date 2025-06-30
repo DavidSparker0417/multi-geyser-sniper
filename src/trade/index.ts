@@ -29,9 +29,8 @@ export async function trade(tokenInfo: TokenInfo) {
     return;
   }
 
-  console.log(`🚀 [${token}] Starting trade`)
+  console.log(`🚀 [${token}] Starting trade(creator: ${tokenInfo.creator})`)
   tradingTokens.set(token, tokenInfo)
-  // fetchMeta(tokenInfo)
   // buy
   let tx
   tradingCount++
@@ -69,7 +68,8 @@ export async function trade(tokenInfo: TokenInfo) {
         // },
         tokenInfo.initialPrice,
         tokenInfo.creator,
-        config.trade.computeUnits
+        config.trade.computeUnits,
+        true
       )
 
       console.log(`[${token}] +++++++++++ bought tx :`, tx)
@@ -190,7 +190,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
     entryPrice = boughtInf?.price || await solPFFetchPrice(token)
     bcInfo = boughtInf?.bcInfo
     solTrGetBalanceChange(investOrTx, undefined, true)
-      .then((value: number) => investAmount = value)
+      .then((value: number) => investAmount = 0 - value)
   }
 
   while(!entryPrice) {
