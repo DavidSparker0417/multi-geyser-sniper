@@ -22,6 +22,10 @@ export let trackerList: string[] = []
 const tokenCache = new TokenCache()
 
 async function filterTrade(tokenInfo: TokenInfo): Promise<boolean> {
+  if (trackerList.includes(tokenInfo.creator)) {
+    console.log(`[${tokenInfo.mint}] Tracker: ${tokenInfo.creator} !!`)
+    return true
+  }
   if (!config.whitelist.includes(tokenInfo.creator)) {
     // console.log(`[filterTrade] Token ${tokenInfo.mint} rejected: Creator not in whitelist`)
     return false

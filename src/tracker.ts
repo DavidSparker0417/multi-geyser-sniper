@@ -75,21 +75,21 @@ export async function trackerTask() {
     })
   }
 
-  const rootTrackers = config.makers
-  solTrGrpcWalletStart(rootTrackers, (data: any) => {
-    if (!data || data.type !== "SolTransfer")
-      return
-    if (!rootTrackers.includes(data.from))
-      return
-    if (data.amount < config.makerSupAmount[0] || data.amount > config.makerSupAmount[1])
-      return
-    console.log(`[** Special Maker **] ${data.from} to ${data.to}`)
-    if (!config.makerEnable) {
-      console.log(`!!!!!!! Maker sniper is disabled!`)
-      return
-    }
-    solTrGrpcWalletStart([data.to], (sdata:any) => {
-      handleTracker(sdata, [...rootTrackers, data.to])
-    })
-  })
+  // const rootTrackers = config.makers
+  // solTrGrpcWalletStart(rootTrackers, (data: any) => {
+  //   if (!data || data.type !== "SolTransfer")
+  //     return
+  //   if (!rootTrackers.includes(data.from))
+  //     return
+  //   if (data.amount < config.makerSupAmount[0] || data.amount > config.makerSupAmount[1])
+  //     return
+  //   console.log(`[** Special Maker **] ${data.from} to ${data.to}`)
+  //   if (!config.makerEnable) {
+  //     console.log(`!!!!!!! Maker sniper is disabled!`)
+  //     return
+  //   }
+  //   solTrGrpcWalletStart([data.to], (sdata:any) => {
+  //     handleTracker(sdata, [...rootTrackers, data.to])
+  //   })
+  // })
 }

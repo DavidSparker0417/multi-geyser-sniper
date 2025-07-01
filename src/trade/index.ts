@@ -61,11 +61,11 @@ export async function trade(tokenInfo: TokenInfo) {
         config.trade.amount,
         config.trade.slippage,
         config.trade.prioFee,
-        config.trade.buyTip,
-        // {
-        //   type: "astralane",
-        //   amount: config.trade.buyTip
-        // },
+        // config.trade.buyTip,
+        {
+          type: "0slot",
+          amount: config.trade.buyTip
+        },
         tokenInfo.initialPrice,
         tokenInfo.creator,
         config.trade.computeUnits,
@@ -216,9 +216,9 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
       if (prePrice !== curPrice) {
         prePrice = curPrice
         priceResetTm = getCurrentTimestamp()
+        console.log(`[${token}] ------------- (${curPrice}/${entryPrice}) (${percent} %) passed: ${passedTime.toFixed(2)}, curReturned : ${returnedAmount}`)
       }
       const idleDuration = (getCurrentTimestamp() - priceResetTm) / 1000
-      console.log(`[${token}] ------------- (${curPrice}/${entryPrice}) (${percent} %) passed: ${passedTime.toFixed(2)}, curReturned : ${returnedAmount}`)
       let sellPercent = tpManager.checkTakeProfits(token, curPrice, idleDuration)
       if (!sellPercent && devSellTrigger) {
         sellPercent = devSellTrigger
@@ -248,8 +248,11 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
                 gSigner,
                 token,
                 sellingTokenAmount,
-                config.trade.slippage,
-                config.trade.sellTip
+                config.trade.slippage, 
+                {
+                  type: "jito",
+                  amount: config.trade.sellTip
+                }
               )
             } else {
               sellTx = await solPFSell(
@@ -258,7 +261,10 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
                 sellingTokenAmount,
                 100,
                 config.trade.prioFee,
-                config.trade.sellTip,
+                {
+                  type: "jito",
+                  amount: config.trade.sellTip
+                },
                 !curPrice ? bcInfo : undefined
               )
             }
@@ -271,17 +277,15 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
           }
         }
       }
-      if (!simulation) {
-        tokenBalance = Number((await solTokenBalance(token, gSigner.publicKey))[0])
-      }
       if (sellTx) {
         priceResetTm = getCurrentTimestamp()
         tpManager.markupLevel(token, curPrice)
+        tokenBalance = Number((await solTokenBalance(token, gSigner.publicKey))[0])
       }
     } catch (error) {
       // console.log(error)
     }
-    await sleep(1500)
+    await sleep(50)
   }
 
   solGrpcStop(token)

@@ -1,38 +1,20 @@
-import { blxPumpNewMintStream, GrpcConfig, PF_MINT_AUTHORITY, PF_WALLET, solTrGrpcPfStart, solTrGrpcWalletStart, solWalletImport } from "dv-sol-lib";
-import { detectionPf, suppliers } from "./detection";
-import { config, loadGrpcConfig } from "./config";
-import { trackerTask } from "./tracker";
-import { access } from "fs";
-import { url } from "inspector";
+import { PF_MINT_AUTHORITY, PF_WALLET, shrdWalletMonitor, shrederStart, solTrGrpcPfStart, solTrGrpcWalletStart, solWalletImport } from "dv-sol-lib";
+import { detectionPf } from "./detection";
 import { gSigner } from "./trade";
+import { loadGrpcConfig } from "./config";
+import { trackerTask } from "./tracker";
 
 async function main() {
   try {
     console.log(`---------------------------------------`)
-    console.log(`🤖 Starting TG bot with ${gSigner.publicKey.toBase58()} ...`)
+    console.log(`🤖 Starting Sniper with ${gSigner.publicKey.toBase58()} ...`)
 
-    const grpcConf = loadGrpcConfig()
-    console.table(grpcConf)
+    trackerTask()
 
-    // botStart()
-    console.log(`---------------------------------------`)
-    console.log(`👀 Starting monitor handlers ...`)
-    for (let i = 0; i < grpcConf.length; i++) {
-      solTrGrpcPfStart(
-        (data: any) => {
-          detectionPf(data, i)
-        },
-        [PF_MINT_AUTHORITY, PF_WALLET],
-        grpcConf[i]
-      )
-    }
-
-    // blxPumpNewMintStream(gSigner, (data: any) => {
-    //   // console.table(data)
-    //   detectionPf(data, grpcConf.length + 1)
-    // })
-    // solTrGrpcWalletStart(config.suppliers, onSupplierTr)
-    // trackerTask()
+    shrdWalletMonitor([PF_MINT_AUTHORITY], (data:any) => {
+      // console.log(data)
+      detectionPf(data, 0)
+    })
   } catch (error: any) {
     console.error(`❌ Error : ${error.message}`)
   }
