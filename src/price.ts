@@ -17,7 +17,6 @@ solTrGrpcPfStart((data:any) => {
   if (data.who === gSigner.publicKey.toBase58()) {
     const tPrice = tokenPrice.get(token)
     if (tPrice) {
-      console.log(`[${token}] ########### aheadBuyers = ${tPrice.buyerCount}`)
       tPrice.aheadBuyers = tPrice.buyerCount
       tokenPrice.set(token, tPrice)
     }
@@ -40,7 +39,7 @@ solTrGrpcPfStart((data:any) => {
     tokenPrice.set(token, tPrice)
     // console.log(`[${token}] ########### price = ${data.price}, buyerCount = ${tPrice.buyerCount}`)
   }
-})
+}, [PF_PROGRAM_ID.toBase58()])
 
 export function getTokenPrice(token: string): number {
   const tPrice = tokenPrice.get(token)
@@ -53,5 +52,5 @@ export function getTokenBuyerCount(token: string): number {
   const tPrice = tokenPrice.get(token)
   if (!tPrice)
     return 0
-  return tPrice.aheadBuyers
+  return tPrice.aheadBuyers || tPrice.buyerCount
 }

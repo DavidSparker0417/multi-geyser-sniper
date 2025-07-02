@@ -3,7 +3,7 @@
     "enabled": true,
     "activeSale": true,
     "simulation": false,
-    "amount": 0.2,
+    "amount": 0.4,
     "slippage": 30,
     "prioFee": 0.1,
     "buyTip": 0.001,
@@ -79,7 +79,8 @@
     "FjeaKDFAgexEPZbAFHwE4cL1MFvn1o6EL1qehcmVStCX",
     "Dctw25eJFfonNpLuAP67UbNsR7B7PEvxFqHGzVggZ8gU",
     "8uWXcvQ3uCQ3WYwNy7M6pzMsQ85ZkYRkGDkEaisx5TNG",
-    "B5ha7Vwf2nDGNG4vG4Lqa3Qw8871qSD8FryrBVZpfqcH"
+    "B5ha7Vwf2nDGNG4vG4Lqa3Qw8871qSD8FryrBVZpfqcH",
+    "Dr8Ej9Vd4od5euVvmAnMwscFmtFZVt7PgjrReFUSJGhf"
   ],
   "liquidityRange": [30, 38]
 }
