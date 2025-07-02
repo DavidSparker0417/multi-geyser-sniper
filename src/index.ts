@@ -1,4 +1,4 @@
-import { PF_MINT_AUTHORITY, PF_WALLET, shrdWalletMonitor, shrederStart, solTrGrpcPfStart, solTrGrpcWalletStart, solWalletImport } from "dv-sol-lib";
+import { PF_MINT_AUTHORITY, PF_PROGRAM_ID, PF_WALLET, shrdWalletMonitor, shrederStart, solTrGrpcPfStart, solTrGrpcWalletStart, solWalletImport } from "dv-sol-lib";
 import { detectionPf } from "./detection";
 import { gSigner } from "./trade";
 import { loadGrpcConfig } from "./config";
@@ -15,6 +15,7 @@ async function main() {
       // console.log(data)
       detectionPf(data, 0)
     })
+
   } catch (error: any) {
     console.error(`❌ Error : ${error.message}`)
   }

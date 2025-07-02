@@ -16,10 +16,10 @@ import { tradeHistoryService } from './db';
 
 export let buyCountsInMintBlock: any = {}
 export const buyingAssets: any = {}
-export const tradingTokens: any = {}
 export const suppliers: string[] = []
 export let trackerList: string[] = []
 const tokenCache = new TokenCache()
+
 
 async function filterTrade(tokenInfo: TokenInfo): Promise<boolean> {
   if (trackerList.includes(tokenInfo.creator)) {

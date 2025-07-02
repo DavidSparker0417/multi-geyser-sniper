@@ -6,11 +6,12 @@ import { fetchMeta } from "../query";
 import { TakeProfitManager } from "./takeProfit";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { tradeHistoryService } from "../db";
+import { getTokenBuyerCount, getTokenPrice } from "../price";
 
 export const gSigner = solWalletImport(process.env.PRIVATE_KEY!)!
 export let tradingCount = 0
 let totalProfit = 0
-const tradingTokens: Map<string, TokenInfo> = new Map()
+export const tradingTokens: Map<string, TokenInfo> = new Map()
 
 export async function trade(tokenInfo: TokenInfo) {
   const token = tokenInfo.mint
@@ -130,6 +131,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
         const tInfo = tradingTokens.get(token)
         if (tInfo) {
           tInfo.migrated = true
+          tradingTokens.set(token, tInfo)
         }
         break;
       case 'Trade':
@@ -168,16 +170,16 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
     }
   }
 
-  solGrpcStart([token], (data: any) => {
-    const tokenInfo = tradingTokens.get(token)
-    if (!tokenInfo)
-      return
-    if (tokenInfo.migrated) {
-      solTrGrpcPumpSwapCallback(data, pumpswapTokenTrEvHandler)
-    } else {
-      solTrGrpcPfCallback(data, pumpfunTokenTrEvHandler)
-    }
-  })
+  // solGrpcStart([token], (data: any) => {
+  //   const tokenInfo = tradingTokens.get(token)
+  //   if (!tokenInfo)
+  //     return
+  //   if (tokenInfo.migrated) {
+  //     solTrGrpcPumpSwapCallback(data, pumpswapTokenTrEvHandler)
+  //   } else {
+  //     solTrGrpcPfCallback(data, pumpfunTokenTrEvHandler)
+  //   }
+  // })
 
   if (typeof investOrTx === 'number') {
     entryPrice = await solPFFetchPrice(token)
@@ -200,6 +202,8 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
   }
   
   // sell
+  const buyerCount = getTokenBuyerCount(token)
+  console.log(`[${token}] ########### entryPrice = ${entryPrice}, curBuyers = ${buyerCount}`)
   const tpManager = new TakeProfitManager(token, entryPrice, config.trade.takeProfits)
   const startTm = getCurrentTimestamp()
   let priceResetTm = getCurrentTimestamp()
@@ -211,7 +215,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
       let sellTx = undefined
       const curTm = getCurrentTimestamp()
       const passedTime = (curTm - startTm) / 1000
-      const curPrice = evPrice || await solPFFetchPrice(token)
+      const curPrice = getTokenPrice(token) || await solPFFetchPrice(token)
       const percent = (curPrice / entryPrice) * 100
       if (prePrice !== curPrice) {
         prePrice = curPrice
@@ -219,7 +223,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
         console.log(`[${token}] ------------- (${curPrice}/${entryPrice}) (${percent} %) passed: ${passedTime.toFixed(2)}, curReturned : ${returnedAmount}`)
       }
       const idleDuration = (getCurrentTimestamp() - priceResetTm) / 1000
-      let sellPercent = tpManager.checkTakeProfits(token, curPrice, idleDuration)
+      let sellPercent = buyerCount > 2 ? 100 : tpManager.checkTakeProfits(token, curPrice, idleDuration)
       if (!sellPercent && devSellTrigger) {
         sellPercent = devSellTrigger
         devSellTrigger = 0
@@ -261,10 +265,11 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
                 sellingTokenAmount,
                 100,
                 config.trade.prioFee,
+                config.trade.sellTip ?
                 {
                   type: "jito",
                   amount: config.trade.sellTip
-                },
+                } : 0,
                 !curPrice ? bcInfo : undefined
               )
             }

@@ -2,16 +2,16 @@
   "trade": {
     "enabled": true,
     "activeSale": true,
-    "simulation": true,
-    "amount": 0.4,
+    "simulation": false,
+    "amount": 0.2,
     "slippage": 30,
     "prioFee": 0.1,
     "buyTip": 0.001,
-    "sellTip": 0.0001,
+    "sellTip": 0,
     "computeUnits": 0,
     "tp": 10,
     "sl": 20,
-    "timeout": 1,
+    "timeout": 5,
     "sellRetry": 3,
     "idleSell": {
       "enabled": false,
@@ -78,7 +78,8 @@
     "22Mm4UP4TVFVzF5eT7azkpKv5NdkdfPQKtN61c1WDKxH",
     "FjeaKDFAgexEPZbAFHwE4cL1MFvn1o6EL1qehcmVStCX",
     "Dctw25eJFfonNpLuAP67UbNsR7B7PEvxFqHGzVggZ8gU",
-    "8uWXcvQ3uCQ3WYwNy7M6pzMsQ85ZkYRkGDkEaisx5TNG"
+    "8uWXcvQ3uCQ3WYwNy7M6pzMsQ85ZkYRkGDkEaisx5TNG",
+    "B5ha7Vwf2nDGNG4vG4Lqa3Qw8871qSD8FryrBVZpfqcH"
   ],
   "liquidityRange": [30, 38]
 }
