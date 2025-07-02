@@ -6,7 +6,7 @@ import { fetchMeta } from "../query";
 import { TakeProfitManager } from "./takeProfit";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { tradeHistoryService } from "../db";
-import { getTokenBuyerCount, getTokenPrice } from "../price";
+import { getTokenAheadSol, getTokenBuyerCount, getTokenPrice } from "../price";
 
 export const gSigner = solWalletImport(process.env.PRIVATE_KEY!)!
 export let tradingCount = 0
@@ -203,7 +203,8 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
   
   // sell
   const buyerCount = getTokenBuyerCount(token)
-  console.log(`[${token}] ########### entryPrice = ${entryPrice}, curBuyers = ${buyerCount}`)
+  const cumulativeSol = getTokenAheadSol(token) / LAMPORTS_PER_SOL
+  console.log(`[${token}] ########### entryPrice = ${entryPrice}, curBuyers = ${buyerCount}, cumulativeSol = ${cumulativeSol}`)
   const tpManager = new TakeProfitManager(token, entryPrice, config.trade.takeProfits)
   const startTm = getCurrentTimestamp()
   let priceResetTm = getCurrentTimestamp()
@@ -223,7 +224,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
         console.log(`[${token}] ------------- (${curPrice}/${entryPrice}) (${percent} %) passed: ${passedTime.toFixed(2)}, curReturned : ${returnedAmount}`)
       }
       const idleDuration = (getCurrentTimestamp() - priceResetTm) / 1000
-      let sellPercent = buyerCount > 2 ? 100 : tpManager.checkTakeProfits(token, curPrice, idleDuration)
+      let sellPercent = (buyerCount > 2 || cumulativeSol > 1) ? 100 : tpManager.checkTakeProfits(token, curPrice, idleDuration)
       if (!sellPercent && devSellTrigger) {
         sellPercent = devSellTrigger
         devSellTrigger = 0
@@ -293,7 +294,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
     await sleep(50)
   }
 
-  solGrpcStop(token)
+  // solGrpcStop(token)
   const profit = returnedAmount - investAmount
   totalProfit += profit
   console.log(`[${token}] Trade finised! profit = ${profit}`)

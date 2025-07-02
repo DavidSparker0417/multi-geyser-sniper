@@ -4,12 +4,12 @@
     "activeSale": true,
     "simulation": false,
     "amount": 0.4,
-    "slippage": 30,
+    "slippage": 100,
     "prioFee": 0.1,
     "buyTip": 0.001,
     "sellTip": 0,
     "computeUnits": 0,
-    "tp": 10,
+    "tp": 20,
     "sl": 20,
     "timeout": 5,
     "sellRetry": 3,
@@ -53,7 +53,7 @@
       "sellPercent": 25
     }
   },
-  "devBuyBlacklist": [],
+  "devBuyBlacklist": [22],
   "whitelist": [
     "23gnWwTUyfCgs4nsg5YHZy6ooE7FsqVVTFtzHM3MQyfo",
     "EtV6GqY9E5wZT5gy9jt3u8SmJnocgAEB9i2chwpZCwZg",
@@ -80,7 +80,11 @@
     "Dctw25eJFfonNpLuAP67UbNsR7B7PEvxFqHGzVggZ8gU",
     "8uWXcvQ3uCQ3WYwNy7M6pzMsQ85ZkYRkGDkEaisx5TNG",
     "B5ha7Vwf2nDGNG4vG4Lqa3Qw8871qSD8FryrBVZpfqcH",
-    "Dr8Ej9Vd4od5euVvmAnMwscFmtFZVt7PgjrReFUSJGhf"
+    "Dr8Ej9Vd4od5euVvmAnMwscFmtFZVt7PgjrReFUSJGhf",
+    "4F3MTjcorsnZvyje7DgeoArzJgCKfchvUZE9XYx7N3g3",
+    "At4iqzv7LzgErfBiDbEyTkxYB5GgJT6C7jugiaHHpR35",
+    "BvZ4ijHiQ5Qfy364H1YJBxzxKEGmmZMQDawQwgndxhWD",
+    "icezyFpWy7wpYy4dKEVuXhbga6t7kVqWUn3iyJPgQ4V"
   ],
   "liquidityRange": [30, 38]
 }

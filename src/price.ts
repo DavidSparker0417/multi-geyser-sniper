@@ -4,7 +4,9 @@ import { gSigner } from "./trade";
 interface TokenTradeInfo {
   price: number
   buyerCount: number
+  cumulativeSol: number
   aheadBuyers: number
+  aheadSol: number
 }
 export const tokenPrice = new Map<string, TokenTradeInfo>();
 
@@ -18,6 +20,7 @@ solTrGrpcPfStart((data:any) => {
     const tPrice = tokenPrice.get(token)
     if (tPrice) {
       tPrice.aheadBuyers = tPrice.buyerCount
+      tPrice.aheadSol = tPrice.cumulativeSol
       tokenPrice.set(token, tPrice)
     }
     return
@@ -29,6 +32,8 @@ solTrGrpcPfStart((data:any) => {
       price: data.price,
       buyerCount: data.how === 'buy' ? 1 : 0,
       aheadBuyers: 0,
+      cumulativeSol: data.how === 'buy' ? data.solAmount : 0,
+      aheadSol: 0,
     })
     setTimeout(() => {
       tokenPrice.delete(token)
@@ -36,6 +41,7 @@ solTrGrpcPfStart((data:any) => {
   } else {
     tPrice.price = data.price
     tPrice.buyerCount += data.how === 'buy' ? 1 : -1
+    tPrice.cumulativeSol += data.how === 'buy' ? data.solAmount : -data.solAmount
     tokenPrice.set(token, tPrice)
     // console.log(`[${token}] ########### price = ${data.price}, buyerCount = ${tPrice.buyerCount}`)
   }
@@ -53,4 +59,11 @@ export function getTokenBuyerCount(token: string): number {
   if (!tPrice)
     return 0
   return tPrice.aheadBuyers || tPrice.buyerCount
+}
+
+export function getTokenAheadSol(token: string): number {
+  const tPrice = tokenPrice.get(token)
+  if (!tPrice)
+    return 0
+  return tPrice.aheadSol
 }

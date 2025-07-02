@@ -26,11 +26,12 @@ async function filterTrade(tokenInfo: TokenInfo): Promise<boolean> {
     console.log(`[${tokenInfo.mint}] Tracker: ${tokenInfo.creator} !!`)
     return true
   }
+
   if (!config.whitelist.includes(tokenInfo.creator)) {
     // console.log(`[filterTrade] Token ${tokenInfo.mint} rejected: Creator not in whitelist`)
     return false
   }
-  if (config.devBuyBlacklist.includes(Number(tokenInfo.devBuy.toFixed(3)))) {
+  if (config.devBuyBlacklist.includes(Number(tokenInfo.devBuy.toFixed(2)))) {
     console.log(`[${tokenInfo.mint}] Token rejected: Dev buy amount ${tokenInfo.devBuy} in blacklist`)
     return false
   }
@@ -65,12 +66,13 @@ async function handlePfMint(data: any) {
     mintBlock: data.block,
     migrated: false
   }
-  // console.table(data)
   const initialLiq = data.initialLiq
   // if (initialLiq < config.liquidityRange[0] || initialLiq > config.liquidityRange[1])
   //   return
-  if (await filterTrade(tokenInfo))
+  if (await filterTrade(tokenInfo)) {
+    console.table(tokenInfo)
     trade(tokenInfo)
+  }
 }
 
 export function detectionPf(data: any, grpcId: number) {
