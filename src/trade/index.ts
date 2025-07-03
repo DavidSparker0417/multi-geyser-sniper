@@ -7,6 +7,7 @@ import { TakeProfitManager } from "./takeProfit";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { tradeHistoryService } from "../db";
 import { getTokenAheadSol, getTokenBuyerCount, getTokenPrice } from "../price";
+import { penaltyAdd } from "./penalty";
 
 export const gSigner = solWalletImport(process.env.PRIVATE_KEY!)!
 export let tradingCount = 0
@@ -62,11 +63,11 @@ export async function trade(tokenInfo: TokenInfo) {
         config.trade.amount,
         config.trade.slippage,
         config.trade.prioFee,
-        // config.trade.buyTip,
-        {
-          type: "0slot",
-          amount: config.trade.buyTip
-        },
+        config.trade.buyTip,
+        // {
+        //   type: "0slot",
+        //   amount: config.trade.buyTip
+        // } : 0,
         tokenInfo.initialPrice,
         tokenInfo.creator,
         config.trade.computeUnits,
@@ -224,7 +225,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
         console.log(`[${token}] ------------- (${curPrice}/${entryPrice}) (${percent} %) passed: ${passedTime.toFixed(2)}, curReturned : ${returnedAmount}`)
       }
       const idleDuration = (getCurrentTimestamp() - priceResetTm) / 1000
-      let sellPercent = (buyerCount > 2 || cumulativeSol > 1) ? 100 : tpManager.checkTakeProfits(token, curPrice, idleDuration)
+      let sellPercent = (buyerCount > 1 || cumulativeSol > 1) ? 100 : tpManager.checkTakeProfits(token, curPrice, idleDuration)
       if (!sellPercent && devSellTrigger) {
         sellPercent = devSellTrigger
         devSellTrigger = 0
@@ -268,7 +269,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
                 config.trade.prioFee,
                 config.trade.sellTip ?
                 {
-                  type: "jito",
+                  type: "0slot",
                   amount: config.trade.sellTip
                 } : 0,
                 !curPrice ? bcInfo : undefined
@@ -299,4 +300,6 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
   totalProfit += profit
   console.log(`[${token}] Trade finised! profit = ${profit}`)
   console.log(`💰 Total profit: ${totalProfit}`)
+  if (profit < 0)
+    penaltyAdd(creator)
 }

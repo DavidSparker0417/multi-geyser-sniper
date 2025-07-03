@@ -40,8 +40,14 @@ interface TradeConfig {
   migrationSell: number;
 }
 
+interface PenaltyConfig {
+  enabled: boolean;
+  time: number;
+}
+
 interface Config {
   trade: TradeConfig;
+  penalty: PenaltyConfig;
   whitelist: string[];
   devBuyBlacklist: number[];
   liquidityRange: number[];

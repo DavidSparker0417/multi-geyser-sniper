@@ -13,6 +13,7 @@ import { TokenInfo } from './types';
 import { trade } from './trade';
 import { tradingCount } from './trade';
 import { tradeHistoryService } from './db';
+import { penaltyHas, penaltyList } from './trade/penalty';
 
 export let buyCountsInMintBlock: any = {}
 export const buyingAssets: any = {}
@@ -22,6 +23,15 @@ const tokenCache = new TokenCache()
 
 
 async function filterTrade(tokenInfo: TokenInfo): Promise<boolean> {
+  // console.log(`penaltyList :`, penaltyList.entries())
+  if (config.penalty.enabled && penaltyHas(tokenInfo.creator)) {
+    console.error(`[${tokenInfo.mint}] Token rejected: Creator(${tokenInfo.creator}) in penalty list`)
+    return false
+  }
+
+  // if (tokenInfo.devBuy > 0 && tokenInfo.devBuy < 1)
+  //   return true
+
   if (trackerList.includes(tokenInfo.creator)) {
     console.log(`[${tokenInfo.mint}] Tracker: ${tokenInfo.creator} !!`)
     return true
@@ -31,18 +41,24 @@ async function filterTrade(tokenInfo: TokenInfo): Promise<boolean> {
     // console.log(`[filterTrade] Token ${tokenInfo.mint} rejected: Creator not in whitelist`)
     return false
   }
+
   if (config.devBuyBlacklist.includes(Number(tokenInfo.devBuy.toFixed(2)))) {
-    console.log(`[${tokenInfo.mint}] Token rejected: Dev buy amount ${tokenInfo.devBuy} in blacklist`)
+    console.error(`[${tokenInfo.mint}] Token rejected: Dev buy amount ${tokenInfo.devBuy} in blacklist`)
+    return false
+  }
+
+  if (tokenInfo.initialPrice > 0.0001) {
+    console.error(`[${tokenInfo.mint}] Token rejected: Initial price ${tokenInfo.initialPrice}`)
     return false
   }
 
   if ((await tradeHistoryService.getTradeHistoryByName(tokenInfo.name)).length > 0) {
-    console.log(`[${tokenInfo.mint}] Token (${tokenInfo.name}) rejected: Trade history exists`)
+    console.error(`[${tokenInfo.mint}] Token (${tokenInfo.name}) rejected: Trade history exists`)
     return false
   }
 
   if ((await tradeHistoryService.getTradeHistoryBySymbol(tokenInfo.symbol)).length > 0) {
-    console.log(`[${tokenInfo.mint}] Token (${tokenInfo.symbol}) rejected: Trade history exists`)
+    console.error(`[${tokenInfo.mint}] Token (${tokenInfo.symbol}) rejected: Trade history exists`)
     return false
   }
   // if (tradingCount > 0) {
