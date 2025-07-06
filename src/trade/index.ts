@@ -44,7 +44,6 @@ export async function trade(tokenInfo: TokenInfo) {
       try {
         tokenBalance = Number(await solPFCalcAmountOut(token, config.trade.amount, true))
         if (tokenBalance) {
-          tokenBalance *= 10 ** 6
           break
         }
       } catch (error) { }
@@ -252,7 +251,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
           sellingTokenAmount = tokenBalance
         console.log(`[${token}] Selling for ${sellingTokenAmount}`)
         if (simulation) {
-          returnedAmount += await solPFCalcAmountOut(token, sellingTokenAmount, false)
+          returnedAmount += (await solPFCalcAmountOut(token, sellingTokenAmount, false)) / LAMPORTS_PER_SOL
           tokenBalance -= sellingTokenAmount
           sellTx = "simulate"
         } else {
