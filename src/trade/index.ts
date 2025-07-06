@@ -158,7 +158,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
       return
     if (data.type !== 'Trade')
       return
-    evPrice = data.price * (10**3)
+    evPrice = data.price * (10 ** 3)
     if (data.how == 'sell' && data.who === creator) {
       const tokenInfo = tradingTokens.get(token)
       if (!tokenInfo)
@@ -196,12 +196,12 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
       .then((value: number) => investAmount = 0 - value)
   }
 
-  while(!entryPrice) {
+  while (!entryPrice) {
     entryPrice = await solPFFetchPrice(token)
     if (!entryPrice)
       await sleep(1000)
   }
-  
+
   // sell
   const buyerCount = getTokenBuyerCount(token)
   const cumulativeSol = getTokenAheadSol(token) / LAMPORTS_PER_SOL
@@ -212,6 +212,16 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
   let prePrice = 0
   let returnedAmount = 0
   const initialBalance = tokenBalance
+  let tBalanceInterval
+  if (!simulation) {
+    tBalanceInterval = setInterval(async () => {
+      try {
+        tokenBalance = Number((await solTokenBalance(token, gSigner.publicKey))[0]) 
+      } catch (error) {
+        tokenBalance = 0
+      }
+    }, 1000)
+  }
   while (tokenBalance) {
     try {
       let sellTx = undefined
@@ -225,7 +235,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
         console.log(`[${token}] ------------- (${curPrice}/${entryPrice}) (${percent} %) passed: ${passedTime.toFixed(2)}, curReturned : ${returnedAmount}`)
       }
       const idleDuration = (getCurrentTimestamp() - priceResetTm) / 1000
-      let sellPercent = (buyerCount > 1 || cumulativeSol > 1) ? 100 : tpManager.checkTakeProfits(token, curPrice, idleDuration)
+      let sellPercent = (buyerCount > 2 || cumulativeSol > 1) ? 100 : tpManager.checkTakeProfits(token, curPrice, idleDuration)
       if (!sellPercent && devSellTrigger) {
         sellPercent = devSellTrigger
         devSellTrigger = 0
@@ -254,7 +264,7 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
                 gSigner,
                 token,
                 sellingTokenAmount,
-                config.trade.slippage, 
+                config.trade.slippage,
                 {
                   type: "jito",
                   amount: config.trade.sellTip
@@ -268,10 +278,10 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
                 100,
                 config.trade.prioFee,
                 config.trade.sellTip ?
-                {
-                  type: "0slot",
-                  amount: config.trade.sellTip
-                } : 0,
+                  {
+                    type: "0slot",
+                    amount: config.trade.sellTip
+                  } : 0,
                 !curPrice ? bcInfo : undefined
               )
             }
@@ -295,11 +305,13 @@ async function sell(token: string, tokenBalance: number, investOrTx: number | st
     await sleep(50)
   }
 
+  if (tBalanceInterval)
+    tBalanceInterval.close()
   // solGrpcStop(token)
   const profit = returnedAmount - investAmount
   totalProfit += profit
   console.log(`[${token}] Trade finised! profit = ${profit}`)
   console.log(`💰 Total profit: ${totalProfit}`)
-  if (profit < 0)
+  if (profit < -0.01)
     penaltyAdd(creator)
 }

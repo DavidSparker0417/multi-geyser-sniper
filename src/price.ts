@@ -65,5 +65,5 @@ export function getTokenAheadSol(token: string): number {
   const tPrice = tokenPrice.get(token)
   if (!tPrice)
     return 0
-  return tPrice.aheadSol
+  return tPrice.aheadSol || tPrice.cumulativeSol
 }

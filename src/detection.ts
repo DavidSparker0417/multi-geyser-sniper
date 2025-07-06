@@ -21,7 +21,6 @@ export const suppliers: string[] = []
 export let trackerList: string[] = []
 const tokenCache = new TokenCache()
 
-
 async function filterTrade(tokenInfo: TokenInfo): Promise<boolean> {
   // console.log(`penaltyList :`, penaltyList.entries())
   if (config.penalty.enabled && penaltyHas(tokenInfo.creator)) {
@@ -37,6 +36,11 @@ async function filterTrade(tokenInfo: TokenInfo): Promise<boolean> {
     return true
   }
 
+  if (config.supplier.enabled && suppliers.includes(tokenInfo.creator)) {
+    console.log(`[${tokenInfo.mint}] Supplier: ${tokenInfo.creator} !!`)
+    return true
+  }
+
   if (!config.whitelist.includes(tokenInfo.creator)) {
     // console.log(`[filterTrade] Token ${tokenInfo.mint} rejected: Creator not in whitelist`)
     return false
@@ -47,20 +51,20 @@ async function filterTrade(tokenInfo: TokenInfo): Promise<boolean> {
     return false
   }
 
-  if (tokenInfo.initialPrice > 0.0001) {
+  if (tokenInfo.initialPrice > 0.0005) {
     console.error(`[${tokenInfo.mint}] Token rejected: Initial price ${tokenInfo.initialPrice}`)
     return false
   }
 
-  if ((await tradeHistoryService.getTradeHistoryByName(tokenInfo.name)).length > 0) {
-    console.error(`[${tokenInfo.mint}] Token (${tokenInfo.name}) rejected: Trade history exists`)
-    return false
-  }
+  // if ((await tradeHistoryService.getTradeHistoryByName(tokenInfo.name)).length > 0) {
+  //   console.error(`[${tokenInfo.mint}] Token (${tokenInfo.name}) rejected: Trade history exists`)
+  //   return false
+  // }
 
-  if ((await tradeHistoryService.getTradeHistoryBySymbol(tokenInfo.symbol)).length > 0) {
-    console.error(`[${tokenInfo.mint}] Token (${tokenInfo.symbol}) rejected: Trade history exists`)
-    return false
-  }
+  // if ((await tradeHistoryService.getTradeHistoryBySymbol(tokenInfo.symbol)).length > 0) {
+  //   console.error(`[${tokenInfo.mint}] Token (${tokenInfo.symbol}) rejected: Trade history exists`)
+  //   return false
+  // }
   // if (tradingCount > 0) {
     //  console.log(`[filterTrade] Token ${tokenInfo.mint} rejected: Trading count > 0 (${tradingCount})`)
     // return false

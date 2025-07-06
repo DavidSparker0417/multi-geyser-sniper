@@ -2,8 +2,8 @@
   "trade": {
     "enabled": true,
     "activeSale": true,
-    "simulation": false,
-    "amount": 0.1,
+    "simulation": true,
+    "amount": 0.3,
     "slippage": 50,
     "prioFee": 0.1,
     "buyTip": 0.0001,
@@ -11,11 +11,11 @@
     "computeUnits": 0,
     "tp": 10,
     "sl": 20,
-    "timeout": 2,
+    "timeout": 3,
     "sellRetry": 3,
     "idleSell": {
       "enabled": false,
-      "idleTime": 10,
+      "idleTime": 20,
       "sellPercentage": 25
     },
     "migrationSell": 20,
@@ -54,17 +54,63 @@
     }
   },
   "penalty": {
-    "enabled": false,
+    "enabled": true,
     "time": 5
   },
-  "devBuyBlacklist": [],
+  "supplier": {
+    "enabled": true,
+    "suppliers": [
+      "5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9"
+    ],
+    "amount": [1.9, 2.1]
+  },
+  "devBuyBlacklist": [33],
   "whitelist": [
-    "2JarGaaVhqcV2FbsxQPLagFpPi4qh3SuKt7adYk299hr",
     "Gj48fuRG8x8QSTh1uVpUa9je2TJBu24ZAhBF3e5GwSNQ",
-    "8cztdSB5pqxrNMGqRnHoPYP71qbeyLe6YeafCmYaBdT6",
     "23gnWwTUyfCgs4nsg5YHZy6ooE7FsqVVTFtzHM3MQyfo",
     "CCTpKnPi5kFmaDbfvfm3wWH2GFKweHT7pe9LUFbF9oAe",
-    "46h2y6nAMmpyjkSigSjrGsYwAZUyuuY4vW1hjNVaBira"
+    "46h2y6nAMmpyjkSigSjrGsYwAZUyuuY4vW1hjNVaBira",
+    "2xKDETThQeNxPZAtkicq8UABrRQtyRfHTwCs57mTpFFQ",
+    "22Mm4UP4TVFVzF5eT7azkpKv5NdkdfPQKtN61c1WDKxH",
+    "GZVSEAajExLJEvACHHQcujBw7nJq98GWUEZtood9LM9b",
+    "C4udGwTg6oqcrr8SmSLmkcXDbaFEcopsiaT21KUE4psU",
+    "Dctw25eJFfonNpLuAP67UbNsR7B7PEvxFqHGzVggZ8gU",
+    "cow88FUh9CC2KYMZnP77AtRsypHLzoc9juJ6V5tanso",
+    "Gj48fuRG8x8QSTh1uVpUa9je2TJBu24ZAhBF3e5GwSNQ",
+    "H7EuwBgWisP7ug4AQc3doJUXYVd5Y3mKj54WpYamX8Gc",
+    "ChLnQ7WPaDNejo7Yd5Mp9f6p8Axc8x5yzGzpDv7s8jPT",
+    "dev6SDTV85sC5uZ55bcCuWiz1rEFd9RhWw5JYAEEXVV",
+    "EtV6GqY9E5wZT5gy9jt3u8SmJnocgAEB9i2chwpZCwZg",
+    "4LVFuib4C95gj7YeFaJqCKX5hQxuEgRDvANWpr7AVc6B",
+    "Dwf1RDeYwLh948Efa4DFhomnzXD7UmSUhAKB9bnRuvB8",
+    "8uWXcvQ3uCQ3WYwNy7M6pzMsQ85ZkYRkGDkEaisx5TNG",
+    "5SW7p56x22LKj8gYcE8DVVd1S59UJUGR9jKq2PFdKiKg",
+    "Bvm5cR74PwHHt7yYUezNQ16vdGDKLzhfwu3UX2sipVbA",
+    "2aDUM62jfcKW7bK6TNC6tq35XYGSyt8oEzCikcM923oV",
+    "4Lm2uqHgauVS1gzzNCd1F4FeGNwzUp6dXp5uqHxmrnDX",
+    "AXniGcG58UQfjWwm4qMtLHqJ3uQqbSTuWUHBmjbJx6Na",
+    "5Q2s8wgA38ZctdjGCD3RT1ccqw35NpYkryx3ZxLtcH2P",
+    "AsA3zPqZ23PHDgj78ubG2fmHgsbfKs3xpfWQkMvaEHYh",
+    "Dr8Ej9Vd4od5euVvmAnMwscFmtFZVt7PgjrReFUSJGhf",
+    "ADLRmekNgd5a4rbXPcVX2CnDpuMWi7zXeENCJ6VoyiDC",
+    "Dagg9bbVNnxdi6AnmWofkt1GvdX69XB7vmhv3kU1UHTY",
+    "Bqy3nCHK8mM1iYLYmeW45ghLxpYPjspPdkP1VLM6nXct",
+    "GPMeGhNT7DVgb9RJHdpJ2nNNahLi5xM8YsXSxCP7iBuG",
+    "4dnWLzmdkLeuDe6hwRBpPqrDbQZ59hpoBu8JLztAescf",
+    "AApCsy9JAz2EXNwjcpcZZwmdPKvgFBq3Fncov6kBYx2S",
+    "G7NvZKjoVqBDWciSYtWWgUPB7DA1iJavdvH5jty2FAmM",
+    "BvZ4ijHiQ5Qfy364H1YJBxzxKEGmmZMQDawQwgndxhWD",
+    "8DS3p2UTuEiNK5XywKdaZUYNkPQNUncFA1Aqh7vx5qDR",
+    "DoWxTJ9qgLr6hMpyr9zLXYvKv3MCkZUa77rNcwevWN1K",
+    "4pMQrW7frnmxq1WCrcC9BEJ3SCPbBXupHhMAubasypoV",
+    "7MKLjQWXoXzHmCbkzE2MvYWAYxcj5PLqyL1n8nwb8JaJ",
+    "icezyFpWy7wpYy4dKEVuXhbga6t7kVqWUn3iyJPgQ4V",
+    "9vZeUZctgfMkcHisVi5WRvxntmbNeiiX2mNrfziXgmT2",
+    "DX7RpxyhbcGeiBQh76ed2wZHw8WZ2CdMoDibpWmX9ajj",
+    "C88rn1cz1PcRJFh44TuynaWbnRis4xuBRi65sD1Nwxog",
+    "Ej9juS6Duqg3RPFfSbtTiTxTrtdYaQD7L9qUBHasY6Ja",
+    "H4RzNyXhbuzMvMWBppCa51FvUpayb9HwVjkjs9YZgrLt",
+    "Ad9JYsyaxewL1NvCd9fMmCNnDkeE5bGGWN4dMLvYBhFV"
   ],
   "liquidityRange": [30, 38]
 }

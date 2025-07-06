@@ -45,9 +45,16 @@ interface PenaltyConfig {
   time: number;
 }
 
+interface SupplierConfig {
+  enabled: boolean;
+  suppliers: string[];
+  amount: number[];
+}
+
 interface Config {
   trade: TradeConfig;
   penalty: PenaltyConfig;
+  supplier: SupplierConfig;
   whitelist: string[];
   devBuyBlacklist: number[];
   liquidityRange: number[];
