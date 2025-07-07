@@ -11,7 +11,7 @@
     "computeUnits": 0,
     "tp": 10,
     "sl": 20,
-    "timeout": 3,
+    "timeout": 30,
     "sellRetry": 3,
     "idleSell": {
       "enabled": false,
@@ -60,9 +60,9 @@
   "supplier": {
     "enabled": true,
     "suppliers": [
-      "5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9"
+      "5ndLnEYqSFiA5yUFHo6LVZ1eWc6Rhh11K5CfJNkoHEPs"
     ],
-    "amount": [1.9, 2.1]
+    "amount": [55, 56]
   },
   "devBuyBlacklist": [33],
   "whitelist": [
